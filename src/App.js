@@ -10,39 +10,38 @@ const initialState = {
 // console.log(initialState);
 const reducer = (state, action) => {
   // console.log(state, action);
+  if (!state.isActive && action.type !== "openAccount") return state;
+
   switch (action.type) {
     case "openAccount":
       return { ...initialState, balance: 500, isActive: true };
     case "deposit":
       return {
         ...state,
-        deposit: 150,
-        isActive: true,
-        balance:
-          state.balance > 0 ? state.balance + state.deposit : state.balance,
+        balance: state.balance + action.payload,
       };
     case "withdraw":
       return {
         ...state,
-        balance: state.balance - action.payload.withdraw,
+        balance: state.balance - action.payload,
       };
     case "requestLoan":
       return {
         ...state,
-        balance: state.balance + action.payload.requestLoan,
-        loan: state.loan + action.payload.requestLoan,
+        balance: state.balance + action.payload,
+        loan: action.payload,
       };
     case "payLoan":
       return {
         ...state,
         balance: state.balance - state.loan,
-        loan: state.loan - state.loan,
+        loan: 0,
       };
     case "closeAccount":
-      if (state.balance === 0 && state.loan === 0) {
+      if (state.balance === 0 && state.loan > 0) {
         return { ...initialState };
       }
-      return state;
+      break;
     default:
       throw new Error("Action unkonwn");
   }
@@ -53,7 +52,7 @@ function App() {
     reducer,
     initialState
   );
-
+  console.log(isActive);
   return (
     <div className="App">
       {}
@@ -78,7 +77,7 @@ function App() {
           <p>
             <button
               onClick={() => {
-                dispatch({ type: "deposit" });
+                dispatch({ type: "deposit", payload: 150 });
               }}
               disabled={false}
             >
@@ -88,7 +87,7 @@ function App() {
           <p>
             <button
               onClick={() => {
-                dispatch({ type: "withdraw", payload: { withdraw: 50 } });
+                dispatch({ type: "withdraw", payload: 50 });
               }}
               disabled={false}
             >
@@ -101,7 +100,7 @@ function App() {
               onClick={() => {
                 dispatch({
                   type: "requestLoan",
-                  payload: { requestLoan: 5000 },
+                  payload: 5000,
                 });
               }}
               disabled={false}
